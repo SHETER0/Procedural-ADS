@@ -10,8 +10,9 @@ its not perfect but it worked for me so Yeah,
 * Drag and drop the transforms for each Aim Down Sights position into the "Aim Down Sights" array field in the inspector.
 * Set the "smoothTime" field to adjust the speed of the transition between positions.
 * Set the "ADSKey" field to the desired key code for aiming down sights (usually Mouse1).
-# Done
-Note: I just made some changes and didn't try it yet so please let me know if you have any issue
+
+# Note
+I have made some changes to the script, but I have not tested it yet. If you encounter any issues, please let me know.
 
 # Code
 ```C#
