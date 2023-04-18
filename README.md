@@ -4,10 +4,13 @@ its not perfect but it worked for me so Yeah,
 
 
 # HOW TO USE
-*  Create a game object postion it where you want your gun to be when aiming and add it to " AimDownSights " List
-*  Add This script to your weapons parent 
-*  Done!
-
+* Attach the script to a game object in your scene that represents the player or the weapon.
+* Drag and drop the weapon's transform onto the "Weapon" field in the inspector.
+* Drag and drop the transforms for the default position and the running position onto their respective fields in the inspector.
+* Drag and drop the transforms for each Aim Down Sights position into the "Aim Down Sights" array field in the inspector.
+* Set the "smoothTime" field to adjust the speed of the transition between positions.
+* Set the "ADSKey" field to the desired key code for aiming down sights (usually Mouse1).
+# Done
 Note: I just made some changes and didn't try it yet so please let me know if you have any issue
 
 # Code
