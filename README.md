@@ -1,7 +1,7 @@
 ## Simple ADS System V2 
 its not perfect but it worked for me so Yeah,
 
-
+Tutorial | https://www.youtube.com/watch?v=vGrZLIa5GBQ
 
 # HOW TO USE
 * Attach the ProceduralADS script to your Weapon gameobject.
