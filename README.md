@@ -4,10 +4,10 @@ its not perfect but it worked for me so Yeah,
 
 
 # HOW TO USE
-* Attach the ProceduralADS script to the GameObject with the Camera component.
+* Attach the ProceduralADS script to your Weapon gameobject.
 * In the Unity editor, assign the required references in the inspector for the script:
-* Assign the WeaponADSLayer transform reference to the appropriate weapon GameObject's transform. This will be the transform that represents the weapon's ADS layer.
-* Assign the _camera reference to the Camera component you attached to the GameObject.
+- Assign the WeaponADSLayer transform reference to the appropriate weapon GameObject's transform. This will be the transform that represents the weapon's ADS layer.
+- Assign the _camera reference to the Camera component you attached to the GameObject.
 * Adjust the values of the variables (smoothTime, offsetX, offsetY, offsetZ, ADSKey) according to your requirements.
 
 # Code
