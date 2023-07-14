@@ -100,4 +100,4 @@ public class ProceduralADS : MonoBehaviour
 
 
 ## 📞 Issues
-If you have any issues feel free to open an issue or contact me on Discord (SHETER#6133).
+If you have any issues feel free to open an issue or contact me on Discord (sheter).
