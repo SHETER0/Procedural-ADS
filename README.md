@@ -1,93 +1,92 @@
-## Simple ADS System 
+## Simple ADS System V2 
 its not perfect but it worked for me so Yeah,
 
 
 
 # HOW TO USE
-* Attach the script to a game object in your scene that represents the player or the weapon.
-* Drag and drop the weapon's transform onto the "Weapon" field in the inspector.
-* Drag and drop the transforms for the default position and the running position onto their respective fields in the inspector.
-* Drag and drop the transforms for each Aim Down Sights position into the "Aim Down Sights" array field in the inspector.
-* Set the "smoothTime" field to adjust the speed of the transition between positions.
-* Set the "ADSKey" field to the desired key code for aiming down sights (usually Mouse1).
-
-# Note
-I have made some changes to the script, but I have not tested it yet. If you encounter any issues, please let me know.
+* Attach the ProceduralADS script to your Weapon gameobject.
+* In the Unity editor, assign the required references in the inspector for the script:
+- Assign the WeaponADSLayer transform reference to the appropriate weapon GameObject's transform. This will be the transform that represents the weapon's ADS layer.
+- Assign the _camera reference to the Camera component you attached to the GameObject.
+* Adjust the values of the variables (smoothTime, offsetX, offsetY, offsetZ, ADSKey) according to your requirements.
 
 # Code
 ```C#
 using UnityEngine;
+
 public class ProceduralADS : MonoBehaviour
 {
-    [Header("Weapon")]
-    [SerializeField] private Transform Weapon;
-    [SerializeField] private int ActiveADS = 0;
-    [Header("Weapon Postions")]
-    private Transform _weaponCurrentPosition;
-    //Reset Position
-    private Transform _weaponDefaultPoition;
-    [SerializeField] private Transform _RunningPostion;
-    [SerializeField] private Transform[] AimDownSights;
+    [Header("Weapon / Camera")]
+    [SerializeField] private Transform WeaponADSLayer;
+    [SerializeField] private Camera _camera;
+
     [Header("Variables")]
-    [SerializeField] private float smoothTime = 10;
-    [SerializeField] private bool IsRunning = false;
+    [SerializeField] private float smoothTime = 10f;
+    [SerializeField] private float offsetX = 10f;
+    [SerializeField] private float offsetY = 10f;
+    [SerializeField] private float offsetZ = 10f;
     [SerializeField] private bool IsAiming = false;
-    [Header("keys")]
+
+    [Header("Keys")]
     [SerializeField] private KeyCode ADSKey = KeyCode.Mouse1;
-    void OnEnable()
+
+    private Vector3 originalWeaponPosition; 
+
+    private void Start()
     {
-        // Reset Weapon Position
-        IsAiming = false;
-        _weaponCurrentPosition.localPosition = Vector3.Lerp(_weaponCurrentPosition.localPosition, _weaponDefaultPoition.localPosition, smoothTime * Time.deltaTime);
-        _weaponCurrentPosition.localRotation = Quaternion.Lerp(_weaponCurrentPosition.localRotation, _weaponDefaultPoition.localRotation, smoothTime * Time.deltaTime);
+        _camera = GetComponentInParent<Camera>();
+        originalWeaponPosition = WeaponADSLayer.localPosition;
+
+        UpdateAiming(false);
     }
 
-    void Update()
+    private void Update()
     {
-        if (IsRunning)
+        myInput();
+        HandleAiming();
+    }
+
+    private void HandleAiming()
+    {
+        if (IsAiming)
         {
-            _weaponCurrentPosition.localPosition = Vector3.Lerp(_weaponCurrentPosition.localPosition, _RunningPostion.localPosition, smoothTime * Time.deltaTime);
-            _weaponCurrentPosition.localRotation = Quaternion.Lerp(_weaponCurrentPosition.localRotation, _RunningPostion.localRotation, smoothTime * Time.deltaTime);
-        }
-        else if (Input.GetKey(ADSKey) && AimDownSights.Length > 1)
-        {
-            _weaponCurrentPosition.localPosition = Vector3.Lerp(_weaponCurrentPosition.localPosition, _weaponDefaultPoition.localPosition, 0.1f);
-            _weaponCurrentPosition.localRotation = Quaternion.Lerp(_weaponCurrentPosition.localRotation, _weaponDefaultPoition.localRotation, 0.1f);
-            IsAiming = true;
-            _weaponCurrentPosition.localPosition = Vector3.Lerp(_weaponCurrentPosition.localPosition, AimDownSights[ActiveADS].localPosition, smoothTime * Time.deltaTime);
-            _weaponCurrentPosition.localRotation = Quaternion.Lerp(_weaponCurrentPosition.localRotation, AimDownSights[ActiveADS].localRotation, smoothTime * Time.deltaTime);
+            // Calculate the target screen position at the center of the screen
+            Vector3 targetScreenPosition = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
 
-            if (Input.GetAxis("Mouse ScrollWheel") > 0f) // Up | Next ADS Position
-            {
-                ActiveADS = ActiveADS++ < AimDownSights.Length - 1 ? ActiveADS++ : 0;
-            }
-            if (Input.GetAxis("Mouse ScrollWheel") < 0f) // Down| Previous ADS Position
-            {
-                ActiveADS = ActiveADS-- > 0 ? ActiveADS-- : AimDownSights.Length - 1;
+            // Convert the screen position to a world position based on the weapon's distance from the camera
+            float distanceFromCamera = Vector3.Distance(WeaponADSLayer.position, _camera.transform.position);
+            Vector3 targetWorldPosition = _camera.ScreenToWorldPoint(new Vector3(targetScreenPosition.x, targetScreenPosition.y, distanceFromCamera));
 
-            }
-            
+            // Convert the world position to a local position relative to the weapon
+            Vector3 targetLocalPosition = WeaponADSLayer.parent.InverseTransformPoint(targetWorldPosition);
 
+            // Apply the specified offsets
+            targetLocalPosition += new Vector3(offsetX, offsetY, offsetZ);
+            targetLocalPosition.z = offsetZ;
+            // Lerp the weapon position to match the target position
+            WeaponADSLayer.localPosition = Vector3.Lerp(WeaponADSLayer.localPosition, targetLocalPosition, Time.deltaTime * smoothTime);
         }
         else
         {
-            _weaponCurrentPosition.localPosition = Vector3.Lerp(_weaponCurrentPosition.localPosition, _weaponDefaultPoition.localPosition, smoothTime * Time.deltaTime);
-            _weaponCurrentPosition.localRotation = Quaternion.Lerp(_weaponCurrentPosition.localRotation, _weaponDefaultPoition.localRotation, smoothTime * Time.deltaTime);
+            WeaponADSLayer.localPosition = Vector3.Lerp(WeaponADSLayer.localPosition, originalWeaponPosition, Time.deltaTime * smoothTime);
         }
-
-
-
-        if (Input.GetKeyUp(ADSKey)) IsAiming = false;
     }
 
-    public void StartRunning()
+    private void myInput()
     {
-        IsRunning = true;
+        if (Input.GetKeyDown(ADSKey))
+        {
+            UpdateAiming(true);
+        }
+        if (Input.GetKeyUp(ADSKey))
+        {
+            UpdateAiming(false);
+        }
     }
 
-    public void StopRunning()
+    private void UpdateAiming(bool Aiming)
     {
-        IsRunning = false;
+        IsAiming = Aiming;
     }
 }
 
